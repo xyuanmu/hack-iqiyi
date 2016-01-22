@@ -1,8 +1,9 @@
 # Hack-iqiyi
 一款 Windows 下获取爱奇艺flash并输出 enc_key 的python小工具，自带精简版 python 2.7.8，无需另外安装。
+
 源码取自：[yan12125/iqiyi-hack](https://github.com/yan12125/iqiyi-hack)
 
-## 软件说明
+## 软件说明：
 * 支持平台：Windows
 * 所需软件：chrome（建议安装衍生版）
 * 下载地址：[点击下载](https://github.com/xyuanmu/hack-iqiyi/archive/master.zip)
