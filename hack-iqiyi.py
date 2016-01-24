@@ -47,8 +47,10 @@ def patch_swf(swf):
         subprocess.check_call(['tool/rabcasm.exe', '%s/%s.main.asasm' % (abc_id, abc_id)])
         subprocess.check_call(['tool/abcreplace.exe', '%s' % swf, '0', '%s/%s.main.abc' % (abc_id, abc_id)])
         print 'Patch succeeded!'
+        return True
     except:
         print 'Patch failed!'
+        return False
 
 
 def history(swf_url):
@@ -90,7 +92,9 @@ Content-Type: application/x-shockwave-flash
             form = request.split('\r\n')
             entry = form[-1]
             content = entry
-            print "the enc key is: %s" % entry
+            if len(entry) == 32:
+                print "the enc key is: %s" % entry
+                os._exit(0)
         else:
             continue
         conn.sendall(content)
@@ -99,5 +103,5 @@ Content-Type: application/x-shockwave-flash
 
 if __name__ == '__main__':
     swf_path = download_swf()
-    patch_swf(swf_path)
-    run_server()
+    patch = patch_swf(swf_path)
+    if patch: run_server()
