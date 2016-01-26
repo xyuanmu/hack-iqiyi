@@ -3,7 +3,7 @@
 import os
 import re
 import sys
-import urllib
+import urllib2
 import shutil
 import socket
 import subprocess
@@ -17,17 +17,20 @@ SWF_NAME = "MainPlayer.swf"
 FDIR = os.path.dirname(os.path.abspath(__file__))
 HOST = '127.0.0.1'
 PORT = 8036
+headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'}
 
 
 def download_swf():
     if os.path.exists(SWF_NAME): os.remove(SWF_NAME)
     print >> sys.stderr, "Downloading the page %s, please wait..." % PAGE_URL
-    data = urllib.urlopen(PAGE_URL).read()
-    swf_url = re.compile(r'http://[^\'"]+MainPlayer[^.]+\.swf').findall(data)
+    req = urllib2.Request(PAGE_URL, headers=headers)
+    page = urllib2.urlopen(req).read()
+    swf_url = re.compile(r'http://[^\'"]+MainPlayer[^.]+\.swf').findall(page)
     swf_url = swf_url[0]
     history(swf_url)
     print 'swf url is %s' % swf_url
-    urllib.urlretrieve(swf_url, SWF_NAME)
+    data = urllib2.urlopen(swf_url).read()
+    open(SWF_NAME, "wb").write(data)
     return os.path.join(FDIR, SWF_NAME)
 
 
