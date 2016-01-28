@@ -16,5 +16,6 @@
 * 最后一步，到浏览器禁用 Hack-iQiYi，不然就无法正常播放了:smile:！
 
 ## 相关内容：
-* Linux平台获取key：[yan12125/iqiyi-hack](https://github.com/yan12125/iqiyi-hack)
-* 解析爱奇艺视频：[parseiqiyi](https://github.com/xyuanmu/parseiqiyi)
+* Linux平台获取爱奇艺key：[yan12125/iqiyi-hack](https://github.com/yan12125/iqiyi-hack)
+* PHP环境解析爱奇艺视频：[parseiqiyi](https://github.com/xyuanmu/parseiqiyi)
+* python解析网站音乐和视频：[soimort/you-get](https://github.com/soimort/you-get)
