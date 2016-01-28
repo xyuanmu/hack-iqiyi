@@ -1,55 +1,55 @@
-# coding: utf-8
-
 import os
 import re
-import sys
-import urllib2
 import shutil
-import socket
+from urllib2 import Request, urlopen
 import subprocess
-import BaseHTTPServer
-from SimpleHTTPServer import SimpleHTTPRequestHandler
 import socket
 
 
 PAGE_URL = "http://www.iqiyi.com/v_19rroonq48.html"
 SWF_NAME = "MainPlayer.swf"
-FDIR = os.path.dirname(os.path.abspath(__file__))
+HISTORY = "history.txt"
 HOST = '127.0.0.1'
 PORT = 8036
-headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0'}
+HEADER = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; rv:43.0) Gecko/20100101 Firefox/43.0'}
 
 
 def download_swf():
-    if os.path.exists(SWF_NAME): os.remove(SWF_NAME)
-    print >> sys.stderr, "Downloading the page %s, please wait..." % PAGE_URL
-    req = urllib2.Request(PAGE_URL, headers=headers)
-    page = urllib2.urlopen(req).read()
-    swf_url = re.compile(r'http://[^\'"]+MainPlayer[^.]+\.swf').findall(page)
-    swf_url = swf_url[0]
-    history(swf_url)
-    print 'swf url is %s' % swf_url
-    data = urllib2.urlopen(swf_url).read()
-    open(SWF_NAME, "wb").write(data)
-    return os.path.join(FDIR, SWF_NAME)
-
-
-def patch_swf(swf):
-    abc_id = '%s-0' % SWF_NAME.split('.')[0]
+    if os.path.isfile(SWF_NAME):
+        os.remove(SWF_NAME)
 
     try:
-        os.remove('%s.abc' % abc_id)
-        shutil.rmtree(abc_id)
+        print "Downloading the page %s, please wait..." % PAGE_URL
+        req = Request(PAGE_URL, headers=HEADER)
+        page = urlopen(req, timeout=5).read()
     except:
-        pass
+        print "URL open failed, please confirm PAGE_URL is exists!"
+        return False
 
     try:
-        subprocess.check_call(['tool/abcexport.exe', '%s' % swf])
-        subprocess.check_call(['tool/rabcdasm.exe', '%s.abc' % abc_id])
-        subprocess.Popen(['tool/patch.exe', '-p0', '-i', '../tool/asasm.patch'], cwd=abc_id).wait()
-        subprocess.check_call(['tool/rabcasm.exe', '%s/%s.main.asasm' % (abc_id, abc_id)])
-        subprocess.check_call(['tool/abcreplace.exe', '%s' % swf, '0', '%s/%s.main.abc' % (abc_id, abc_id)])
+        swf_url = re.compile(r'http://[^\'"]+MainPlayer[^.]+\.swf').findall(page)[0]
+        print 'swf url is %s' % swf_url
+        history(swf_url)
+        data = urlopen(swf_url, timeout=10).read()
+        open(SWF_NAME, "wb").write(data)
+        return True
+    except:
+        print "Download swf failed!"
+        return False
+
+
+def patch_swf():
+    abc_path = '%s-0' % SWF_NAME.split('.')[0]
+    remove_files(abc_path)
+
+    try:
+        subprocess.check_call(['tool/abcexport.exe', '%s' % SWF_NAME])
+        subprocess.check_call(['tool/rabcdasm.exe', '%s.abc' % abc_path])
+        subprocess.Popen(['tool/patch.exe', '-p0', '-i', '../tool/asasm.patch'], cwd=abc_path).wait()
+        subprocess.check_call(['tool/rabcasm.exe', '%s/%s.main.asasm' % (abc_path, abc_path)])
+        subprocess.check_call(['tool/abcreplace.exe', '%s' % SWF_NAME, '0', '%s/%s.main.abc' % (abc_path, abc_path)])
         print 'Patch succeeded!'
+        remove_files(abc_path)
         return True
     except:
         print 'Patch failed!'
@@ -57,10 +57,20 @@ def patch_swf(swf):
 
 
 def history(swf_url):
-    filename = 'history.txt'
-    cache = open(filename).read()
-    his_swf = re.split("\r|\n", cache)
-    if swf_url not in his_swf: open('history.txt', 'a').write(swf_url + "\n")
+    his_swf = []
+    if os.path.exists(HISTORY):
+        cache = open(HISTORY).read()
+        his_swf = re.split("\r|\n", cache)
+    if swf_url not in his_swf:
+        open(HISTORY, 'a').write(swf_url + "\n")
+
+
+def remove_files(abc_path):
+    try:
+        os.remove('%s.abc' % abc_path)
+        shutil.rmtree(abc_path)
+    except:
+        pass
 
 
 def run_server():
@@ -81,11 +91,11 @@ Content-Type: application/x-shockwave-flash
     while True:
         conn, addr = sock.accept()
         request = conn.recv(1024)
-        method = request.split(' ')[0]
         try:
-            src  = request.split(' ')[1]
+            method = request.split()[0]
+            src  = request.split()[1]
         except:
-            break
+            pass
         if method == 'GET':
             if src == '/%s' % SWF_NAME:
                 content = swf_content
@@ -105,6 +115,6 @@ Content-Type: application/x-shockwave-flash
 
 
 if __name__ == '__main__':
-    swf_path = download_swf()
-    patch = patch_swf(swf_path)
+    swf = download_swf()
+    patch = patch_swf() if swf else False
     if patch: run_server()
