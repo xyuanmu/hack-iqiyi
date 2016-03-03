@@ -23,11 +23,11 @@ def download_swf():
         req = Request(PAGE_URL, headers=HEADER)
         page = urlopen(req, timeout=5).read()
     except:
-        print "URL open failed, please confirm PAGE_URL is exists!"
+        print "URL open failed, please confirm %s is exists!" % PAGE_URL
         return False
 
     try:
-        swf_url = re.compile(r'http://[^\'"]+MainPlayer[^.]+\.swf').findall(page)[0]
+        swf_url = re.compile(r'http://www.iqiyi.com/common/flashplayer/\d+/[^.]+\.swf').findall(page)[0]
         print 'swf url is %s' % swf_url
         history(swf_url)
         data = urlopen(swf_url, timeout=10).read()
@@ -57,10 +57,7 @@ def patch_swf():
 
 
 def history(swf_url):
-    his_swf = []
-    if os.path.exists(HISTORY):
-        cache = open(HISTORY).read()
-        his_swf = re.split("\r|\n", cache)
+    his_swf = re.split("\r|\n", open(HISTORY).read()) if os.path.isfile(HISTORY) else []
     if swf_url not in his_swf:
         open(HISTORY, 'a').write(swf_url + "\n")
 
