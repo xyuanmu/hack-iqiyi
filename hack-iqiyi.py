@@ -27,7 +27,7 @@ def download_swf():
         return False
 
     try:
-        swf_url = re.compile(r'http://www.iqiyi.com/common/flashplayer/\d+/[^.]+\.swf').findall(page)[0]
+        swf_url = re.compile(r'http://www.iqiyi.com/common/flashplayer/\d+/[0-9a-z_]+.swf').findall(page)[0]
         print 'swf url is %s' % swf_url
         history(swf_url)
         data = urlopen(swf_url, timeout=10).read()
