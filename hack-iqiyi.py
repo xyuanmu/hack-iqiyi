@@ -27,7 +27,7 @@ def download_swf():
         return False
 
     try:
-        swf_url = re.compile(r'http://www.iqiyi.com/common/flashplayer/\d+/[0-9a-z_]+.swf').findall(page)[0]
+        swf_url = re.compile(r'flashurl="(http://[^\'"]+\d+/\w+.swf)').findall(page)[0]
         print 'swf url is %s' % swf_url
         history(swf_url)
         data = urlopen(swf_url, timeout=10).read()
@@ -45,13 +45,17 @@ def patch_swf():
     try:
         subprocess.check_call(['tool/abcexport.exe', '%s' % SWF_NAME])
         subprocess.check_call(['tool/rabcdasm.exe', '%s.abc' % abc_path])
-        subprocess.Popen(['tool/patch.exe', '-p0', '-i', '../tool/asasm.patch'], cwd=abc_path).wait()
+        subprocess.Popen(['tool/patch.exe', '-p0', '-bi', '../tool/asasm.patch'], cwd=abc_path).wait()
         subprocess.check_call(['tool/rabcasm.exe', '%s/%s.main.asasm' % (abc_path, abc_path)])
         subprocess.check_call(['tool/abcreplace.exe', '%s' % SWF_NAME, '0', '%s/%s.main.abc' % (abc_path, abc_path)])
+    except:
+        print 'Patch failed!'
+        return False
+    if os.path.isfile('%s/Zombie.class.asasm.orig' % abc_path):
         print 'Patch succeeded!'
         remove_files(abc_path)
         return True
-    except:
+    else:
         print 'Patch failed!'
         return False
 
