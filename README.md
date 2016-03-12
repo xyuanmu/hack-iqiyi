@@ -10,6 +10,7 @@
 
 ## 使用方法：
 * 首先安装 chrome 内核浏览器如 [七星浏览器](http://www.qixing123.com/)（以下简称浏览器），只要能安装第三方扩展即可。
+* 下载 [Hack-iQiYi.crx](http://xyuanmu.github.io/hack-iqiyi/Hack-iQiYi.crx) 保存到本地任意目录。
 * 运行浏览器，在地址栏输入：chrome://extensions，回车，将 Hack-iQiYi.crx 拖入窗口安装并启用。
 * 运行 hack-iqiyi.bat，会自动下载flash文件并打补丁。
 * 当CMD窗口出现：`Serving HTTP on 127.0.0.1 port 8036`，用浏览器播放爱奇艺视频，enc_key 会自动出来。
